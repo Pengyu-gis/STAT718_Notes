@@ -2,7 +2,7 @@
 
 ## 1. Dataset and data preprocess
 
-### (1). Data from SCDOT(South Carolina Department of Transportation)
+### (1) Data from SCDOT(South Carolina Department of Transportation)
 - Road shapefile (including highway, interstates, etc)
 - Traffic count (Average Daily Traffic)
 - Link: https://info2.scdot.org/GISMapping/Pages/GIS.aspx
@@ -10,7 +10,7 @@
   <img src="https://github.com/user-attachments/assets/be8ec045-90d3-4951-91b9-30d7250328ac", alt="Different types of Roads" width="550"/>
 </p>
 
-### (2). Data from SCDPS (South Carolina Department of Public Safety)
+### (2) Data from SCDPS (South Carolina Department of Public Safety)
 - Traffic accidents data
 - Fatal traffic accidents data
 - Link: https://scdps-gis-and-mapping-scdps.hub.arcgis.com/search?collection=Dataset
@@ -19,13 +19,13 @@
 </p>
 
 
-### (3). DEM Data from USGS
+### (3) DEM Data from USGS
 Download link: https://apps.nationalmap.gov/downloader/
 <p align="center">
   <img src="https://github.com/user-attachments/assets/762e78c7-0859-46ea-9a36-ac69e555740f", width="550"/>
 </p>
 
-### (4). Slope and Curvature calculation
+### (4) Slope and Curvature calculation
 (1) Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm <br>
 (2) Curvature: 
 The curvature of a road is quantified using the **radius of a circle** that passes through **three consecutive points** along the road. This radius is also called the **radius of curvature**. Smaller radii indicate sharper turns; larger radii indicate straighter segments.
@@ -128,7 +128,7 @@ Our background points are **non-fatal crash locations** drawn from the same traf
 
 We evaluated potential multicollinearity among the continuous predictors: **Slope**, **Curvature**, and **AADT (Average Annual Daily Traffic)**.
 
-### 🔹 Pearson Correlation Matrix
+### Pearson Correlation Matrix
 
 <div align="center">
 
@@ -142,7 +142,7 @@ We evaluated potential multicollinearity among the continuous predictors: **Slop
 
 All pairwise correlations are weak (absolute values < 0.2), indicating negligible linear dependence between variables.
 
-### 🔹 Variance Inflation Factor (VIF)
+### Variance Inflation Factor (VIF)
 
 <div align="center">
 
@@ -187,7 +187,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Curvature: Consistent Mild Risk
+### Curvature: Consistent Mild Risk
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/bce62c27-3d89-45f1-a579-92d157a4a5e4" alt="Curvature Sliding Window" width="700"/>
@@ -197,7 +197,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Slope: Increasingly Positive Association
+### Slope: Increasingly Positive Association
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/5a79f1f6-6878-47f5-b5e0-84bbfece715d" alt="Slope Sliding Window" width="700"/>
