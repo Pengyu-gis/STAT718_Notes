@@ -177,7 +177,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 AADT: Effect Weakens at Higher Traffic Volume
+### AADT: Effect Weakens at Higher Traffic Volume
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/b51078b7-280f-44b8-b124-fe228ddb4cd5" alt="AADT Sliding Window" width="700"/>
@@ -243,7 +243,7 @@ Each diagnostic follows these steps:
 
 ## 8. Road-Type-Specific Modeling: Highways vs. Local Roads
 
-### 🔹 Poisson GLM Summary: Highways and Interstates
+### Poisson GLM Summary: Highways and Interstates
 
 <div align="center">
 
@@ -265,7 +265,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Poisson GLM Summary: Local Roads
+### Poisson GLM Summary: Local Roads
 
 <div align="center">
 
@@ -287,7 +287,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Spatial Distribution of $\hat{\lambda}(x)$: Highway vs. Local Roads
+### Spatial Distribution of $\hat{\lambda}(x)$: Highway vs. Local Roads
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/6bcf1167-7f57-4b0c-8290-1a8f921bf2fd" alt="Lambda Intensity By Road Type" width="700"/>
@@ -297,7 +297,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Sliding Window Analysis of AADT Coefficient
+### Sliding Window Analysis of AADT Coefficient
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/eca0b406-cb1a-4716-ba60-0fac8fd88b08" alt="AADT Coefficients by Road Type" width="700"/>
@@ -307,3 +307,4 @@ Each diagnostic follows these steps:
 
 ---
 
+*Edited by Pengyu. 4/15/2025*
