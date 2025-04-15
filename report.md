@@ -5,7 +5,7 @@
 ### (1). Data from SCDOT(South Carolina Department of Transportation)
 - Road shapefile (including highway, interstates, etc)
 - Traffic count (Average Daily Traffic)
-
+- Link: https://info2.scdot.org/GISMapping/Pages/GIS.aspx
 <p align="center">
   <img src="https://github.com/user-attachments/assets/be8ec045-90d3-4951-91b9-30d7250328ac", alt="Different types of Roads" width="500"/>
 </p>
@@ -13,15 +13,18 @@
 ### (2). Data from SCDPS (South Carolina Department of Public Safety)
 - Traffic accidents data
 - Fatal traffic accidents data
-
+- Link: https://scdps-gis-and-mapping-scdps.hub.arcgis.com/search?collection=Dataset
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/a010c623-c39a-4db3-863b-049afe1b8d29", alt="Different types of Roads" width="500"/>
+  <img src="https://github.com/user-attachments/assets/3ff0cc95-63da-45a4-9a17-1d3fa0876348", alt="Different types of Roads" width="500"/>
 </p>
 
 
 ### (3). DEM Data from USGS
+Download link: https://apps.nationalmap.gov/downloader/
 
 ### (4). Slope and Curvature calculation
+- Slope: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
+- Curvature: 
 
 ## 2. Modeling Framework: Poisson Point Process
 
