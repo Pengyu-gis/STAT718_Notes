@@ -112,7 +112,7 @@ This transforms the full likelihood into a form that is implementable via **weig
 In our point process modeling, the **weights** serve to approximate the integral term in the likelihood using a discrete set of non-event (background) points.
 
 - For **fatalities**, we assign:
-  $$w_i = 1$$
+  $$w_i = 1$$ (It's not a real "weight")
 
 - For **background points**, we assign:
   $$w_j = \frac{A}{m}$$
