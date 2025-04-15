@@ -21,6 +21,9 @@
 
 ### (3). DEM Data from USGS
 Download link: https://apps.nationalmap.gov/downloader/
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/762e78c7-0859-46ea-9a36-ac69e555740f", width="500"/>
+</p>
 
 ### (4). Slope and Curvature calculation
 - Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
