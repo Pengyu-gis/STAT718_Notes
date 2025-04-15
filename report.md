@@ -1,6 +1,29 @@
 # Spatial Analysis of Fatal Road Accidents Using Poisson Point Process Modeling
 
-## 1. Modeling Framework: Poisson Point Process
+## 1. Dataset and data preprocess
+
+### (1). Data from SCDOT(South Carolina Department of Transportation)
+- Road shapefile (including highway, interstates, etc)
+- Traffic count (Average Daily Traffic)
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/be8ec045-90d3-4951-91b9-30d7250328ac", alt="Different types of Roads" width="500"/>
+</p>
+
+### (2). Data from SCDPS (South Carolina Department of Public Safety)
+- Traffic accidents data
+- Fatal traffic accidents data
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/a010c623-c39a-4db3-863b-049afe1b8d29", alt="Different types of Roads" width="500"/>
+</p>
+
+
+### (3). DEM Data from USGS
+
+### (4). Slope and Curvature calculation
+
+## 2. Modeling Framework: Poisson Point Process
 
 In this study, we model the occurrence of fatal road traffic accidents as a **spatial Poisson point process**. This approach treats the observed fatalities as realizations of a stochastic process occurring over a continuous spatial domain (in our case, the road network of South Carolina).
 
@@ -28,7 +51,7 @@ Where:
 
 This transforms the full likelihood into a form that is implementable via **weighted Poisson regression**.
 
-## 2. The Meaning of Weights
+## 3. The Meaning of Weights
 
 In our point process modeling, the **weights** serve to approximate the integral term in the likelihood using a discrete set of non-event (background) points.
 
@@ -45,7 +68,7 @@ This weighting ensures that the background points collectively approximate the s
 
 Our background points are **non-fatal crash locations** drawn from the same traffic accident dataset, which assumes that the exposure to fatality is proportional to exposure to any crash. Hence, the model estimates the **fatality intensity conditional on crash occurrence**.
 
-## 3. Correlation and Dependence Between Predictors
+## 4. Correlation and Dependence Between Predictors
 
 We evaluated potential multicollinearity among the continuous predictors: **Slope**, **Curvature**, and **AADT (Average Annual Daily Traffic)**.
 
@@ -81,7 +104,7 @@ All pairwise correlations are weak (absolute values < 0.2), indicating negligibl
 
 All VIFs are close to 1.0, well below the standard threshold of 5 or 10 for concern. This confirms that **multicollinearity is not present** in the dataset.
 
-## 4. Covariate Diagnostics via Sliding Window Regression (All Roads)
+## 5. Covariate Diagnostics via Sliding Window Regression (All Roads)
 
 To investigate whether the effects of continuous covariates remain stable across their ranges, we conducted a **sliding window Poisson regression** for:
 
@@ -128,7 +151,7 @@ Each diagnostic follows these steps:
 
 ---
 
-## 5. Spatial Distribution of Estimated Fatal Crash Intensity \( \hat{\lambda}(x) \)
+## 6. Spatial Distribution of Estimated Fatal Crash Intensity $\hat{\lambda}(x)$
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/08d28ed3-d2a4-411f-b625-7abe51318bc2" alt="Lambda Intensity All Roads" width="700"/>
@@ -138,7 +161,7 @@ Each diagnostic follows these steps:
 
 ---
 
-## 6. GLM Results: Poisson Point Process on All Roads
+## 7. GLM Results: Poisson Point Process on All Roads
 
 <div align="center">
 
@@ -162,7 +185,7 @@ Each diagnostic follows these steps:
 
 ---
 
-## 7. Road-Type-Specific Modeling: Highways vs. Local Roads
+## 8. Road-Type-Specific Modeling: Highways vs. Local Roads
 
 ### 🔹 Poisson GLM Summary: Highways and Interstates
 
@@ -208,7 +231,7 @@ Each diagnostic follows these steps:
 
 ---
 
-### 🔹 Spatial Distribution of λ̂(x): Highway vs. Local Roads
+### 🔹 Spatial Distribution of $\hat{\lambda}(x)$: Highway vs. Local Roads
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/6bcf1167-7f57-4b0c-8290-1a8f921bf2fd" alt="Lambda Intensity By Road Type" width="700"/>
