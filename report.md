@@ -32,6 +32,7 @@ The curvature of a road is quantified using the **radius of a circle** that pass
 <p align="center">
 <img src="https://github.com/user-attachments/assets/c6575d1f-f867-4cc9-9c35-e4388bdd9e4f", width="550"/>
 </p>
+
 Assume three sequential points on the road:
 - $P_1 = (x_1, y_1)$  
 - $P_2 = (x_2, y_2)$  
