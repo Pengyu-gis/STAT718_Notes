@@ -23,7 +23,7 @@
 Download link: https://apps.nationalmap.gov/downloader/
 
 ### (4). Slope and Curvature calculation
-- Slope: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
+- Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
 - Curvature: 
 
 ## 2. Modeling Framework: Poisson Point Process
