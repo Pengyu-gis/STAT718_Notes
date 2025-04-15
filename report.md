@@ -6,6 +6,7 @@
 - Road shapefile (including highway, interstates, etc)
 - Traffic count (Average Daily Traffic)
 - Link: https://info2.scdot.org/GISMapping/Pages/GIS.aspx
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/be8ec045-90d3-4951-91b9-30d7250328ac", alt="Different types of Roads" width="550"/>
 </p>
@@ -14,6 +15,7 @@
 - Traffic accidents data
 - Fatal traffic accidents data
 - Link: https://scdps-gis-and-mapping-scdps.hub.arcgis.com/search?collection=Dataset
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/3ff0cc95-63da-45a4-9a17-1d3fa0876348", alt="Different types of Roads" width="550"/>
 </p>
@@ -21,6 +23,7 @@
 
 ### (3) DEM Data from USGS
 Download link: https://apps.nationalmap.gov/downloader/
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/762e78c7-0859-46ea-9a36-ac69e555740f", width="550"/>
 </p>
@@ -29,6 +32,7 @@ Download link: https://apps.nationalmap.gov/downloader/
 (1) Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm <br>
 (2) Curvature: 
 The curvature of a road is quantified using the **radius of a circle** that passes through **three consecutive points** along the road. This radius is also called the **radius of curvature**. Smaller radii indicate sharper turns; larger radii indicate straighter segments.
+
 <p align="center">
 <img src="https://github.com/user-attachments/assets/c6575d1f-f867-4cc9-9c35-e4388bdd9e4f", width="550"/>
 </p>
