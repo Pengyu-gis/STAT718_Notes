@@ -73,7 +73,7 @@ To compute the curvature along the entire road line:
 - Slide a 3-point window along the line.
 - Calculate $R$ at each step using the above method.
 - Assign $R$ to the middle point.
-- Repeat for all points, padding start/end if needed.
+- Repeat for all points.
 
 ---
 
