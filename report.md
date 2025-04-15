@@ -26,8 +26,56 @@ Download link: https://apps.nationalmap.gov/downloader/
 </p>
 
 ### (4). Slope and Curvature calculation
-- Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
-- Curvature: 
+(1). Slope: We calculate slope using ArcGIS, the ArcGIS document Link: https://pro.arcgis.com/en/pro-app/latest/tool-reference/spatial-analyst/how-slope-works.htm
+
+(2). Curvature: 
+The curvature of a road is quantified using the **radius of a circle** that passes through **three consecutive points** along the road. This radius is also called the **radius of curvature**. Smaller radii indicate sharper turns; larger radii indicate straighter segments.
+
+Assume three sequential points on the road:
+- $P_1 = (x_1, y_1)$  
+- $P_2 = (x_2, y_2)$  
+- $P_3 = (x_3, y_3)$
+  
+We want to find the radius $R$ of the **circumcircle** passing through these three points.
+
+1. Compute the Determinant $D$
+
+This value helps locate the circle's center (circumcenter):
+
+$$
+D = 2 \cdot (x_1(y_2 - y_3) + x_2(y_3 - y_1) + x_3(y_1 - y_2))
+$$
+
+2. Compute Coordinates of Circumcenter $(x_c, y_c)$
+
+These are the coordinates of the center of the circle:
+
+$$
+x_c = \frac{(x_1^2 + y_1^2)(y_2 - y_3) + (x_2^2 + y_2^2)(y_3 - y_1) + (x_3^2 + y_3^2)(y_1 - y_2)}{D}
+$$
+
+$$
+y_c = \frac{(x_1^2 + y_1^2)(x_3 - x_2) + (x_2^2 + y_2^2)(x_1 - x_3) + (x_3^2 + y_3^2)(x_2 - x_1)}{D}
+$$
+
+3. Compute the Radius $R$
+
+The radius is the Euclidean distance from the center $(x_c, y_c)$ to any of the three points (e.g., $P_1$):
+
+$$
+R = \sqrt{(x_1 - x_c)^2 + (y_1 - y_c)^2}
+$$
+
+4. Repeat Along the Line
+
+To compute the curvature along the entire road line:
+
+- Slide a 3-point window along the line.
+- Calculate $R$ at each step using the above method.
+- Assign $R$ to the middle point.
+- Repeat for all points, padding start/end if needed.
+
+---
 
 ## 2. Modeling Framework: Poisson Point Process
 
