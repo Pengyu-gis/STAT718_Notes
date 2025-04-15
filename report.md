@@ -1,4 +1,4 @@
-# Spatial Analysis of Fatal Road Accidents Using Poisson Point Process Modeling
+# Spatial Analysis of Fatal Traffic Accidents Using Poisson Point Process
 
 ## 1. Dataset and data preprocess
 
