@@ -1,208 +1,479 @@
-# Point process
+# 📘 Notes on Point Processes (Spatial and Spatio-Temporal View)
 
-# Part 1 – What *Is* a Point Process?
+## Part 1: Fundamentals of Point Processes
 
-## 1. Intuition
-A **point process** is a probabilistic mechanism that scatters dimension‑less events in space—or in space × time—such that every realization is a dot map.
+### 1.1 What is a Point Process?
 
-## 2. Motivation
-* Goes beyond aggregate counts: it captures **where** and **when** events occur.
-* Separates first‑order inhomogeneity (trend) from second‑order interaction (clustering or inhibition).
+A **point process** is a random collection of events—or "points"—occurring in a mathematical space such as:
 
-## 3. Formal Definition
-Let the study window be $W \subset \mathbb{R}^2$ and the observation interval be $T \subset \mathbb{R}$.  
-A realization is  
-$$\mathbf{X} = \{(s_i, t_i)\}_{i=1}^{N} \subset W \times T,$$
-where $(s_i, t_i)$ denotes the spatial location and timestamp of the $i$‑th event.  
-Randomness enters through both **how many** points appear and **where/when** they appear.
+- A 1D timeline (e.g., times of phone calls),
+- A 2D spatial domain (e.g., locations of trees, crimes, or disease cases),
+- Or a 3D space-time continuum (e.g., earthquakes with locations and times).
 
-## 4. First‑Order Property
-The **intensity function** is defined as
-$$\lambda(s, t) = \lim_{\lvert \Delta s \rvert,\, \Delta t \to 0} 
-\frac{\mathbb{E}\,[N(\Delta s, \Delta t)]}
-     {\lvert \Delta s \rvert \, \Delta t},$$
-representing the expected number of events per unit area and per unit time at $(s, t)$.
+A **spatial point process** models the random locations of events in space:  
+Let $W \subset \mathbb{R}^2$ be a bounded spatial domain. A realization of a point process $\mathbf{X}$ is a finite set of points:
+$$
+\mathbf{X} = \{ s_1, s_2, \dots, s_n \}, \quad s_i \in W.
+$$
 
-* **Homogeneous** process: $\lambda(s, t)$ is constant.  
-* **Inhomogeneous** process: $\lambda(s, t)$ varies with space, time, or covariates.
+A **spatio-temporal point process** extends this by adding time:
+$$
+\mathbf{X} = \{ (s_1, t_1), (s_2, t_2), \dots, (s_n, t_n) \}, \quad s_i \in W, \, t_i \in T \subset \mathbb{R}.
+$$
 
-# Part 2 – Complete Spatial Randomness & the K‑Function
-
-## 1. Intuition
-**Complete Spatial Randomness (CSR)** posits that events occur independently and uniformly across the study region.  
-* If CSR holds, any apparent clusters are purely accidental.  
-* Rejecting CSR is the first step toward more realistic models (e.g., inhomogeneous Poisson, Cox, Hawkes).
-
-## 2. Ripley’s $K$‑Function
-For a 2‑D stationary point process with intensity $\lambda$,
-\[
-K(r) \;=\; \frac{1}{\lambda}\,
-\mathbb{E}\bigl[\text{number of extra points within distance } r
-\text{ of an arbitrary point}\bigr].
-\]
-
-* Under CSR (homogeneous Poisson) in the plane,
-  \[
-  K_{\text{CSR}}(r) = \pi r^{2}.
-  \]
-* A **pair‑correlation function** $g(r) = \dfrac{\mathrm{d}K(r)}{2\pi r\,\mathrm{d}r}$ gives local interaction:
-  * $g(r) > 1$ ⇒ clustering at scale $r$  
-  * $g(r) < 1$ ⇒ inhibition / regularity at scale $r$
-
-## 3. Edge Correction
-Points near the study window boundary have their neighborhoods truncated.  
-Common corrections:
-| Method | Idea | Use‑case |
-|--------|------|----------|
-| Border | Discard reference points closer than $r$ to the edge | Fast, biased if window small |
-| Ripley isotropic | Weight each pair by reciprocal of the proportion of circle inside window | Default in `spatstat` |
-| Translation | Translate edges onto themselves | Good for rectangular windows |
-
-## 4. Monte Carlo CSR Test (Global Envelope)
-1. Compute the empirical $\hat{K}(r)$ from data with edge correction.  
-2. Simulate $M$ CSR patterns with the same intensity and window.  
-3. For each simulation $m$, calculate $\hat{K}^{(m)}(r)$.  
-4. Build upper/lower envelopes, e.g. 2.5⁠–⁠97.5 percentiles.  
-5. **Reject CSR** if the observed $\hat{K}(r)$ leaves the envelope for any $r$.
-
-> **Interpretation tip**  
-> Plot the **$L$‑function** $L(r)=\sqrt{\hat{K}(r)/\pi}$; CSR corresponds to $L(r)=r$, so deviations are easier to see.
-
-## 5. Example (R / `spatstat`)
-```r
-library(spatstat.geom); library(spatstat.core)
-
-# 1. Load crash points (replace with your own shapefile)
-pp  <- as.ppp(crash_coords, W = as.owin(study_window))
-
-# 2. Estimate K with isotropic correction
-Khat <- Kest(pp, correction = "iso")
-
-# 3. CSR envelope with 99 simulations
-env  <- envelope(pp, Kest, nsim = 99, correction = "iso")
-
-# 4. Plot
-plot(env, . - theo ~ r, legend = FALSE,
-     main = "L(r) - r under CSR",
-     ylab = "L(r) - r")
-abline(h = 0, lty = 2)
-```
-### 6. Key Takeaways
-CSR = homogeneous Poisson. Departures indicate spatial dependence or inhomogeneity.
-
-Always edge‑correct; otherwise small windows falsely suggest inhibition.
-
-Testing CSR is diagnostic, not a final model. If rejected, next fit an inhomogeneous Poisson or an interaction model.
-
-# Lesson 3 – Intensity Estimation and the Inhomogeneous Poisson Model  
-*A deep‑dive into first‑order structure*
+> Each realization is a "dot map" of where (and when) events occurred.
 
 ---
 
-## 1 Conceptual Foundation
+### 1.2 Why Use Point Processes?
 
-### 1.1 Mean Measure vs. Intensity  
-For a planar point process $\mathbf X$ observed in window $W\subset\mathbb R^{2}$,
+Point processes capture not only the **count** of events, but also their **pattern**:
+- Are events **clustered**, **random**, or **regularly spaced**?
+- Are they **stationary** or **inhomogeneous** in space/time?
+- Do they exhibit **interaction** (e.g., attraction or repulsion)?
 
-$$
-\Lambda(B) \;=\; \mathbb E[N(B)], \quad  
-\lambda(s) \;=\; \frac{\partial^{2}\Lambda(B)}{\partial x\,\partial y}
-\;\;\biggr|_{s\in B}.
-$$
-
-* $\Lambda(B)$ – expected **count** inside any Borel set $B$.  
-* $\lambda(s)$ – expected **density** of events at location $s$ (points / unit area).
-
-If events occur on a linear network $L$ of total length $|L|$ the denominator is **unit length**, and for space–time data it is **unit area × unit time**.
+These questions cannot be answered by simple aggregate counts.
 
 ---
 
-## 2 Non‑parametric Intensity: Kernel Smoothing
+### 1.3 Basic Types of Point Processes
 
-### 2.1 Fixed‑Bandwidth Estimator  
-
-$$
-\widehat{\lambda}_h(s) =
-\frac{1}{h^2}
-\sum_{i=1}^{N}
-\frac{1}{e_i(s)}\,
-K\left( \frac{ \lVert s - s_i \rVert }{ h } \right)
-$$
-
-
-
-where  
-
-* $K(\cdot)$ is a radially symmetric kernel with $\int_{\mathbb R^{2}} K(\lVert u\rVert) \,du = 1$.  
-* $h$ is the bandwidth (smoothing radius).  
-* $e_i(s)=\int_{W} K_h(s-u)\,du$ is the **edge correction** weight.
-
-> **Common kernels**  
-> $K(r)=\frac{1}{2\pi}\exp(-\tfrac12 r^{2})$ (Gaussian) | $K(r)=\frac{3}{\pi}(1-r^{2})_{+}$ (Epanechnikov).
+- **Homogeneous Poisson Process (HPP)**: Events are completely random; constant intensity $\lambda$.
+- **Inhomogeneous Poisson Process (IPP)**: Intensity $\lambda(s)$ varies with location.
+- **Cluster Processes** (e.g., Thomas process): Points cluster around "parent" events.
+- **Inhibitory Processes** (e.g., Strauss process): Points repel each other.
 
 ---
 
-### 2.2 Bandwidth Selection
+### 1.4 Assumptions and Properties of a Point Process
 
-| Approach                     | Bandwidth‑selection criterion                                                                                      | Practical notes                                                                                                       | Key reference |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|---------------|
-| Rule‑of‑thumb                | $h_{\text{ROT}} = 0.15 \sqrt{|W|/N}$                                                                                | Extremely fast; assumes a homogeneous Poisson process, so it ignores spatial clustering.                              | (Diggle, 1985) |
-| Likelihood cross‑validation  | $\displaystyle \max_{h}\sum_{i=1}^{N}\log\!\left[\widehat{\lambda}_{h,-i}(s_i)\right]$                              | Default in `spatstat::bw.ppl`; robust to inhomogeneity but computationally expensive for large $N$.                   | (Baddeley & Turner, 2005) |
-| Least‑squares cross‑valid.   | $\displaystyle \min_{h} \int_{W} \left[ \widehat{\lambda}_{h}(s) - \widehat{\lambda}_{\text{pilot}}(s) \right]^2 \, ds$ | Sensitive to the pilot bandwidth; often undersmooths with sparse data.                                                | (Cronie & van Lieshout, 2016) |
-| Plug‑in (variance matching)  | $\displaystyle h_{\text{PI}} = \arg\min_{h} \left| \widehat{\sigma}^{2}(h) - \sigma^{2}_{\text{target}} \right|$         | Yields stable estimates when $N$ is large; requires a pilot step to estimate the underlying Gaussian‑field variance.   | (Baddeley et al., 2016) |
+Let $W \subset \mathbb{R}^2$ denote a bounded spatial window (e.g., a study region), and let $N(B)$ denote the number of events (points) falling within a Borel-measurable subset $B \subset W$.
 
-
-> **Bias–variance trade‑off**  
-> Small $h$ yields noisy “spikes”; large $h$ oversmooths and hides structure. Report both *map* and *bandwidth* in papers.
+For a well-defined point process, the following structural properties are often assumed or examined:
 
 ---
 
-### 2.3 Adaptive Kernel Smoothing  
+#### 🔹 Simplicity
 
-Set a pilot intensity $\tilde\lambda(s)$ with fixed $h_0$, then let  
+A point process is said to be **simple** if it does not place multiple events at the same location.
 
-$$h(s) = h_0 \biggl[\frac{\tilde\lambda(s)}{\text{median}\{\tilde\lambda(s)\}}\biggr]^{-1/2}.$$
-
-Dense areas get a smaller bandwidth, preserving sharp hotspots; sparse areas get wider bandwidth, reducing variance.
-
----
-
-## 3 Parametric Intensity: Log‑Linear Poisson Model
-
-### 3.1 Model Specification  
-
+Formally:
 $$
-\lambda(s) \;=\; \exp\!\bigl(\beta_0 + \beta^{\top}Z(s)\bigr),
+\mathbb{P}(s_i = s_j) = 0 \quad \text{for all } i \neq j
 $$
 
-where $Z(s) = \bigl(Z_1(s),\dots,Z_p(s)\bigr)$ are spatial covariate fields (elevation, population, AADT, land‑use fractions, …).  
+This ensures that points are distinct and no two events occur at exactly the same coordinates.
 
-* Interpretation: $\exp(\beta_k)$ is the multiplicative change in intensity for a one‑unit increase in $Z_k$ (holding others fixed).  
-* Add an **offset** $\log(E(s))$ if observation effort $E(s)$ varies across $W$.
+**Geospatial Interpretation:**
+- In most physical phenomena (e.g., tree locations, accident sites), it is unlikely for two events to be recorded at precisely the same point.
+- However, in some applications (e.g., telecommunications or highly discrete datasets), **non-simple** processes may arise and need to be treated carefully (e.g., using marked or multi-type point processes).
 
 ---
 
-### 3.2 Likelihood via Berman–Turner Quadrature
+#### 🔹 Local Finiteness
 
-Create $n_D$ dummy (integration) points $\{u_j\}$ with weights $w_j$.  
-Let $y_i=1$ for events, $y_j=0$ for dummies.
+A point process is **locally finite** if, for any bounded region $B \subset W$, the number of points in $B$ is finite almost surely:
 
-$$\ell(\beta) \;=\;
-\sum_{i=1}^{N}\beta^{\top}Z(s_i)
-\;-\;
-\sum_{j=1}^{n_D} w_j\,\exp\!\bigl[\beta^{\top}Z(u_j)\bigr].$$
+$$
+\mathbb{P}(N(B) < \infty) = 1
+$$
 
-This is equivalent to a weighted Poisson GLM:
+This condition prevents the occurrence of an infinite number of events in a finite region, which would be nonphysical.
 
-```r
-library(spatstat.geom); library(spatstat.core)
-X  <- ppm(points_ppp,
-          ~ elev + aadt + factor(landuse),
-          covariates = list(elev = elev_raster,
-                            aadt = aadt_raster,
-                            landuse = landuse_raster))
-summary(X)
-```
+**Geospatial Interpretation:**
+- Ensures model realism: one cannot observe infinite car crashes, trees, or disease cases within a finite spatial extent.
+- A necessary assumption for practical statistical inference and visualization.
+
+---
+
+#### 🔹 Stationarity (Translation Invariance)
+
+A point process is **stationary** if its statistical properties do not change when the entire process is translated in space.
+
+Formally, let $\mathbf{X}$ be a point process and let $u \in \mathbb{R}^2$ be a translation vector. Then $\mathbf{X}$ is stationary if:
+$$
+\mathbf{X} \overset{d}{=} \mathbf{X} + u
+$$
+i.e., the distribution of $\mathbf{X}$ is the same as that of $\mathbf{X} + u$.
+
+**First-order stationarity** implies that the intensity function $\lambda(s)$ is constant:
+$$
+\lambda(s) = \lambda > 0 \quad \text{for all } s \in W
+$$
+
+**Geospatial Interpretation:**
+- In urban planning, assuming stationarity would imply that events (e.g., accidents) are equally likely across the entire city—often unrealistic.
+- Therefore, **inhomogeneous models** (non-stationary) are typically more appropriate for real-world data.
+
+---
+
+#### 🔹 Isotropy (Rotational Invariance)
+
+A point process is **isotropic** if its properties are invariant under rotations about any point (typically the origin).
+
+Formally, for a rotation matrix $R \in \text{SO}(2)$, the process satisfies:
+$$
+\mathbf{X} \overset{d}{=} R \mathbf{X}
+$$
+
+This implies that second-order properties such as pair correlation functions depend only on the distance between points, not the direction.
+
+**Geospatial Interpretation:**
+- An isotropic process implies there is no preferred direction in the spatial pattern.
+- Violated in cases like:
+  - Linear features (e.g., road networks, rivers),
+  - Environmental gradients (e.g., pollution diffusion in wind direction),
+  - Urban corridors or coastline-aligned processes.
+
+---
+
+### Summary Table
+
+| Property       | Description                                             | Practical Implication                                      |
+|----------------|---------------------------------------------------------|-------------------------------------------------------------|
+| Simplicity     | No duplicate points                                     | Ensures unique event locations                             |
+| Local Finiteness | Finite points in any bounded region                   | Prevents unrealistic infinite densities                    |
+| Stationarity   | Invariant under translation                            | Events equally likely everywhere (if homogeneous)          |
+| Isotropy       | Invariant under rotation                               | No directional bias in spatial structure                   |
+
+---
+
+### Common Violations
+
+- **Nonstationarity**: Urban centers have higher intensity of events (accidents, crimes).
+- **Anisotropy**: Events aligned along roads, rivers, coastlines, etc.
+- **Non-simplicity**: Duplicated events (e.g., multiple GPS pings at same location).
+- **Local non-finiteness**: Sensor noise or faulty data generation.
+
+These violations guide the choice of models (e.g., Poisson vs Cox, homogeneous vs inhomogeneous, isotropic vs anisotropic kernels).
 
 
 
+---
+
+## Part 2: Mathematical Framework
+
+## 2.1 First-Order Properties — The Intensity Function
+
+The **intensity function** $\lambda(s)$ is the foundational concept of the first-order structure in a point process. It describes the expected number of events per unit area at any spatial location $s \in W$:
+
+$$
+\lambda(s) = \lim_{|ds| \to 0} \frac{\mathbb{E}[N(ds)]}{|ds|}
+$$
+
+where:
+- $ds$ is a small area around location $s$,
+- $N(ds)$ is the number of points falling within $ds$,
+- $\mathbb{E}[\cdot]$ denotes expectation.
+
+---
+
+### 🔹 Units and Interpretation
+
+- Units: typically points per km² or per m².
+- Interpretation: high $\lambda(s)$ indicates a denser expected concentration of events near $s$.
+
+---
+
+### 🔹 Homogeneous Poisson Point Process (HPPP)
+
+In the homogeneous case, the intensity is constant throughout the domain:
+$$
+\lambda(s) = \lambda > 0 \quad \text{for all } s \in W
+$$
+
+Let $B \subset W$ be a region with area $|B|$. Then:
+
+- The number of points $N(B)$ in $B$ follows a Poisson distribution:
+  $$
+  N(B) \sim \text{Poisson}(\lambda |B|)
+  $$
+
+- Events are **independent**: the number of points in disjoint regions are independent random variables.
+
+---
+
+### 🔹 Inhomogeneous Poisson Point Process (IPPP)
+
+In the inhomogeneous case, the intensity varies with location:
+$$
+\lambda(s) : W \rightarrow \mathbb{R}^+
+$$
+
+Then:
+- For any region $B$:
+  $$
+  N(B) \sim \text{Poisson} \left( \int_B \lambda(s) \, ds \right)
+  $$
+
+- The expected number of points in $B$ is:
+  $$
+  \mathbb{E}[N(B)] = \int_B \lambda(s) \, ds
+  $$
+
+> This model accounts for spatial inhomogeneity (e.g., higher intensity of crime in urban cores vs suburbs).
+
+---
+
+## 2.2 Estimating Intensity from Observed Data
+
+### 🔹 Kernel Smoothing Estimator
+
+Given a realization of $n$ observed points $\{s_1, \dots, s_n\}$, the intensity function $\lambda(s)$ can be nonparametrically estimated using **kernel smoothing**:
+
+$$
+\hat{\lambda}_h(s) = \frac{1}{n} \sum_{i=1}^n \frac{1}{h^2} \, K\left( \frac{\lVert s - s_i \rVert}{h} \right)
+$$
+
+where:
+- $h$ is the **bandwidth**, controlling the smoothing level,
+- $K(\cdot)$ is the **kernel function** (e.g., Gaussian, Epanechnikov),
+- $\lVert s - s_i \rVert$ is the Euclidean distance between evaluation point $s$ and observation $s_i$.
+
+**Common kernel choices:**
+- Gaussian: $K(u) = \frac{1}{2\pi} e^{-u^2/2}$
+- Epanechnikov: $K(u) = \frac{3}{4}(1 - u^2)$ for $|u| < 1$
+
+> This yields a smooth surface approximation of intensity across space — analogous to KDE (Kernel Density Estimation).
+
+---
+
+### 🔹 What is Kernel Smoothing?
+
+**Kernel smoothing** is a nonparametric technique that estimates a continuous function (here, the intensity surface) by averaging nearby observations with weights decreasing with distance.
+
+It can be visualized as placing a "bump" (the kernel) over each observed point and summing all bumps to form a surface.
+
+- Small $h$: high resolution, sensitive to local variation (but may overfit).
+- Large $h$: smoother surface, reduces noise (but may oversmooth).
+
+---
+
+## 2.3 Regression Models in Point Processes
+
+### 🔹 Is Regression Involved?
+
+Yes — particularly for **inhomogeneous** processes, **intensity regression models** are often used.
+
+The goal is to model $\lambda(s)$ as a function of covariates $Z(s)$:
+$$
+\lambda(s) = \exp\left( \beta_0 + \beta_1 Z_1(s) + \dots + \beta_p Z_p(s) \right)
+$$
+
+This is analogous to a **Poisson regression** in generalized linear models (GLM), where:
+- $\lambda(s)$ is the mean rate (log-linked),
+- $Z_k(s)$ are spatial covariates (e.g., elevation, population density, distance to roads).
+
+---
+
+### 🔹 When is Regression Necessary?
+
+Regression is **not required** for defining a point process but is:
+- Necessary for **inference**, **explanation**, or **prediction**,
+- Useful when exploring the relationship between spatial events and environmental or contextual variables.
+
+> In contrast, **kernel smoothing** is exploratory, while **regression modeling** enables hypothesis testing and covariate interpretation.
+
+---
+
+### 🔹 Example (Geographic Scenario)
+
+Suppose you're studying wildfire occurrences in California.
+
+- **Without covariates**: Estimate intensity using kernel smoothing.
+- **With covariates**: Fit an inhomogeneous Poisson process using:
+  - $Z_1(s)$: distance to nearest road,
+  - $Z_2(s)$: NDVI (vegetation index),
+  - $Z_3(s)$: historical temperature.
+
+Then:
+$$
+\lambda(s) = \exp( \beta_0 + \beta_1 \cdot \text{RoadDist}(s) + \beta_2 \cdot \text{NDVI}(s) + \beta_3 \cdot \text{Temp}(s) )
+$$
+
+This allows for both estimation and interpretation of spatial drivers.
+
+---
+
+## 🔍 2.4 Deriving Intensity for Inhomogeneous Poisson Point Process (IPPP) with Covariates
+
+Suppose we observe $n$ events at locations $s_1, s_2, \dots, s_n \in W$ in a spatial domain $W \subset \mathbb{R}^2$.
+
+Let $\mathbf{Z}(s) = (Z_1(s), \dots, Z_p(s))$ be a vector of $p$ spatial covariates observed at each location $s$.  
+We model the intensity function $\lambda(s)$ using a **log-linear regression** form:
+
+### 🔹 Intensity Function (Log-Linear Model)
+
+$$
+\lambda(s) = \exp\left( \beta_0 + \sum_{k=1}^p \beta_k Z_k(s) \right)
+= \exp\left( \mathbf{Z}(s)^\top \boldsymbol{\beta} \right)
+$$
+
+where:
+- $\boldsymbol{\beta} = (\beta_0, \beta_1, \dots, \beta_p)^\top$ is the vector of regression coefficients,
+- $Z_0(s) \equiv 1$ serves as the intercept term.
+
+---
+
+## 🔹 Likelihood Function for IPPP
+
+In an **IPPP**, the number of points in any Borel set $B$ follows:
+
+$$
+N(B) \sim \text{Poisson} \left( \int_B \lambda(s) \, ds \right)
+$$
+
+Let $\mathcal{S} = \{s_1, \dots, s_n\}$ be the observed points, and assume conditional independence of locations.  
+Then the **likelihood** of observing these $n$ points under intensity $\lambda(s)$ is:
+
+$$
+L(\boldsymbol{\beta}) = \left[ \prod_{i=1}^n \lambda(s_i) \right] \cdot \exp\left( - \int_W \lambda(s) \, ds \right)
+$$
+
+This formula includes:
+- The **product of intensities** at the observed event locations,
+- A **normalizing term** to ensure the total intensity over the region $W$ matches the expected number of events.
+
+---
+
+## 🔹 Log-Likelihood Function
+
+Taking the logarithm of the likelihood:
+
+$$
+\log L(\boldsymbol{\beta}) = \sum_{i=1}^n \log \lambda(s_i) - \int_W \lambda(s) \, ds
+$$
+
+Substitute the log-linear form of $\lambda(s)$:
+
+$$
+\log L(\boldsymbol{\beta}) = \sum_{i=1}^n \mathbf{Z}(s_i)^\top \boldsymbol{\beta} - \int_W \exp\left( \mathbf{Z}(s)^\top \boldsymbol{\beta} \right) ds
+$$
+
+This is the objective function maximized in **Poisson point process regression** (a type of spatial GLM).
+
+---
+
+## 🔹 Estimating Parameters
+
+To obtain $\hat{\boldsymbol{\beta}}$, maximize $\log L(\boldsymbol{\beta})$ numerically, usually via:
+
+- Newton-Raphson or Fisher scoring algorithms,
+- Quasi-likelihood methods,
+- Variational inference in Bayesian settings.
+
+In practice, the integral:
+$$
+\int_W \exp\left( \mathbf{Z}(s)^\top \boldsymbol{\beta} \right) ds
+$$
+is **approximated using quadrature**, e.g., by discretizing $W$ into grid cells.
+
+---
+
+## 🔹 Interpretation of Coefficients
+
+Each $\beta_k$ describes the **log change in expected event intensity** per unit increase in covariate $Z_k(s)$, holding others constant.
+
+- $\beta_k > 0$ → increasing $Z_k$ leads to higher intensity (e.g., higher population density → more crime events),
+- $\beta_k < 0$ → increasing $Z_k$ suppresses intensity.
+
+---
+
+## Example: Fatal Accidents on Roads
+
+Suppose you're modeling crash locations with three covariates:
+- $Z_1(s)$: AADT (traffic volume),
+- $Z_2(s)$: slope of the road,
+- $Z_3(s)$: road curvature.
+
+Then:
+$$
+\lambda(s) = \exp\left( \beta_0 + \beta_1 \cdot \text{AADT}(s) + \beta_2 \cdot \text{Slope}(s) + \beta_3 \cdot \text{Curvature}(s) \right)
+$$
+
+This model can be fitted using maximum likelihood and visualized as an estimated **crash risk surface**.
+
+---
+
+
+### 2.5 Second-Order Properties — Pair Correlation
+
+Second-order properties study **interaction** between pairs of points. Define the second-order intensity:
+
+$$
+\rho^{(2)}(s, s') = \lim_{|ds||ds'| \to 0} \frac{\mathbb{E}[N(ds)N(ds')]}{|ds||ds'|}
+$$
+
+The **pair correlation function** $g(s, s')$ is:
+
+$$
+g(s, s') = \frac{\rho^{(2)}(s, s')}{\lambda(s)\lambda(s')}
+$$
+
+Interpretation:
+- $g(s, s') > 1$: clustering
+- $g(s, s') = 1$: independence
+- $g(s, s') < 1$: inhibition
+
+---
+
+## Part 3: Spatio-Temporal Point Processes
+
+### 3.1 Definition
+
+A **spatio-temporal point process** describes random events in both space and time. Formally:
+
+Let $W \subset \mathbb{R}^2$ be the spatial domain, and $T \subset \mathbb{R}$ be the time interval.
+
+The process generates a finite set:
+$$
+\mathbf{X} = \{(s_i, t_i)\}_{i=1}^n, \quad s_i \in W, \; t_i \in T.
+$$
+
+This could model:
+- Disease outbreak data (case locations and times),
+- Traffic accidents (locations and timestamps),
+- Wildlife sightings (GPS tracks + observation times).
+
+---
+
+### 3.2 Spatio-Temporal Intensity Function
+
+The **spatio-temporal intensity function** $\lambda(s, t)$ gives the expected rate of event occurrence per unit space and time:
+
+$$
+\lambda(s, t) = \lim_{|ds| \to 0, \, dt \to 0} \frac{\mathbb{E}[N(ds \times dt)]}{|ds| \cdot dt}
+$$
+
+If separable:
+$$
+\lambda(s, t) = \lambda_S(s) \cdot \lambda_T(t)
+$$
+
+This separability simplifies modeling assumptions.
+
+---
+
+### 3.3 Conditional Intensity Function
+
+When the process is **history-dependent** (e.g., self-exciting), we define the **conditional intensity**:
+
+$$
+\lambda(s, t \mid \mathcal{H}_t) = \lim_{|ds|, dt \to 0} \frac{\mathbb{E}[N(ds \times dt) \mid \mathcal{H}_t]}{|ds| \cdot dt}
+$$
+
+- $\mathcal{H}_t$: history of the process up to time $t$.
+- Used in **Hawkes processes**, where past events increase the likelihood of future events nearby.
+
+---
+
+### 3.4 Example Use Case (Urban Crashes)
+
+Let $\lambda(s, t)$ be the intensity of fatal traffic crashes in Charleston over 24 hours.
+
+- High $\lambda(s, t)$ at downtown intersections between 6-9 AM and 5-7 PM.
+- Low $\lambda(s, t)$ in residential zones at night.
+
+This structure can be inferred and predicted using kernel smoothing or Poisson regression.
+
+---
